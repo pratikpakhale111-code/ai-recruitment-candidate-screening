@@ -13,6 +13,21 @@ An API-first recruitment screening MVP that extracts job-relevant resume evidenc
 
 The initial increment includes the API foundation and SQLAlchemy database schema. Resume processing, AI analysis, and the recruiter dashboard will arrive in the roadmap sequence.
 
+## Current API routes
+
+The API is available under `/api/v1`; the interactive Swagger page at `/docs` lists request fields and response schemas.
+
+| Method | Route | Purpose |
+|---|---|---|
+| `POST` | `/api/v1/jobs` | Create a job |
+| `GET` | `/api/v1/jobs` | List jobs |
+| `GET` | `/api/v1/jobs/{job_id}` | Get a job |
+| `POST` | `/api/v1/candidates` | Create a candidate profile |
+| `GET` | `/api/v1/candidates` | List candidate profiles |
+| `GET` | `/api/v1/candidates/{candidate_id}` | Get a candidate profile |
+| `POST` | `/api/v1/applications` | Link a candidate to a job |
+| `GET` | `/api/v1/applications` | List applications; optionally filter with `?job_id=...` |
+
 ## Database
 
 SQLAlchemy supports both databases through the same models. The local quick start uses SQLite, so you can run the project without a separate database service. PostgreSQL is supported through `DATABASE_URL` and is the intended deployment database. To use PostgreSQL locally, set a connection string such as `postgresql+psycopg://USER:PASSWORD@localhost:5432/ai_recruitment` in `.env` and make sure the PostgreSQL server and database are available.
