@@ -1,0 +1,31 @@
+# AI Recruitment & Candidate Screening System
+
+An API-first recruitment screening MVP that extracts job-relevant resume evidence, compares it with a job description, ranks candidates transparently, and leaves shortlist decisions with the recruiter.
+
+## Start locally
+
+1. Use Python 3.11 or newer and create a virtual environment.
+2. Install the dependencies: `python -m pip install -r requirements.txt`.
+3. Copy `.env.example` to `.env` and adjust settings if needed.
+4. Start the API: `uvicorn app.main:app --reload`.
+5. Open `http://127.0.0.1:8000/docs` for the interactive REST API or `http://127.0.0.1:8000/health` for the health check.
+
+The first increment is intentionally small. Database tables, resume processing, AI analysis, and the recruiter dashboard will arrive in the roadmap sequence.
+
+## Project layout
+
+```text
+app/
+  api/          HTTP routes
+  main.py       FastAPI application
+  settings.py   Environment-based configuration
+ROADMAP.md      15-day plan and progress log
+```
+
+## Configuration
+
+Copy `.env.example` to `.env` for local settings. Keep credentials in `.env` or deployment secrets; never commit secrets or real candidate files.
+
+## Responsible use
+
+This tool supports initial screening. It must present job-related evidence and uncertainty, and a recruiter must make every hiring decision. Do not use protected characteristics to score or rank candidates.

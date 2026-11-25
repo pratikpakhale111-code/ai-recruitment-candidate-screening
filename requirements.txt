@@ -1,0 +1,12 @@
+fastapi
+uvicorn[standard]
+pydantic-settings
+sqlalchemy
+python-multipart
+pypdf
+python-docx
+psycopg[binary]
+redis
+langgraph
+langchain-core
+chromadb
