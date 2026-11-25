@@ -4,11 +4,12 @@ An API-first recruitment screening MVP that extracts job-relevant resume evidenc
 
 ## Start locally
 
-1. Use Python 3.11 or newer and create a virtual environment.
-2. Install the dependencies: `python -m pip install -r requirements.txt`.
-3. Copy `.env.example` to `.env` and adjust settings if needed.
-4. Start the API: `uvicorn app.main:app --reload`.
-5. Open `http://127.0.0.1:8000/docs` for the interactive REST API or `http://127.0.0.1:8000/health` for the health check.
+1. Activate the Conda environment you already created: `conda activate aiproject`.
+2. Use Python 3.11 or newer in that environment: `python --version`.
+3. Install the project dependencies: `python -m pip install -r requirements.txt`.
+4. Copy `.env.example` to `.env` and adjust settings if needed: `copy .env.example .env` (Anaconda Prompt on Windows).
+5. Start the API: `uvicorn app.main:app --reload`.
+6. Open `http://127.0.0.1:8000/docs` for the interactive REST API or `http://127.0.0.1:8000/health` for the health check.
 
 The first increment is intentionally small. Database tables, resume processing, AI analysis, and the recruiter dashboard will arrive in the roadmap sequence.
 
