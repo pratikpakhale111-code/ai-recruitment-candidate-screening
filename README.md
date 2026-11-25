@@ -11,13 +11,19 @@ An API-first recruitment screening MVP that extracts job-relevant resume evidenc
 5. Start the API: `uvicorn app.main:app --reload`.
 6. Open `http://127.0.0.1:8000/docs` for the interactive REST API or `http://127.0.0.1:8000/health` for the health check.
 
-The first increment is intentionally small. Database tables, resume processing, AI analysis, and the recruiter dashboard will arrive in the roadmap sequence.
+The initial increment includes the API foundation and SQLAlchemy database schema. Resume processing, AI analysis, and the recruiter dashboard will arrive in the roadmap sequence.
+
+## Database
+
+SQLAlchemy supports both databases through the same models. The local quick start uses SQLite, so you can run the project without a separate database service. PostgreSQL is supported through `DATABASE_URL` and is the intended deployment database. To use PostgreSQL locally, set a connection string such as `postgresql+psycopg://USER:PASSWORD@localhost:5432/ai_recruitment` in `.env` and make sure the PostgreSQL server and database are available.
 
 ## Project layout
 
 ```text
 app/
   api/          HTTP routes
+  db/           SQLAlchemy base, connection, and sessions
+  models/       Jobs, candidates, applications, screening, and decisions
   main.py       FastAPI application
   settings.py   Environment-based configuration
 ROADMAP.md      15-day plan and progress log
