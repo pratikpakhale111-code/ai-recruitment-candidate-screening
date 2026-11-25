@@ -2,9 +2,10 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.api.schemas import CandidateCreate, CandidateRead
+from app.api.schemas import CandidateAnalysisRead, CandidateCreate, CandidateRead
 from app.db.session import get_db
 from app.models import Candidate
+from app.services.profile_analyzer import analyze_candidate_resume, merge_skills
 
 router = APIRouter(prefix="/candidates", tags=["candidates"])
 
@@ -34,3 +35,33 @@ def get_candidate(candidate_id: int, db: Session = Depends(get_db)) -> Candidate
     if candidate is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Candidate not found")
     return candidate
+
+
+@router.post("/{candidate_id}/analyze", response_model=CandidateAnalysisRead)
+def analyze_candidate(candidate_id: int, db: Session = Depends(get_db)) -> CandidateAnalysisRead:
+    candidate = db.get(Candidate, candidate_id)
+    if candidate is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Candidate not found")
+    if not candidate.resume_text:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Upload a resume before analyzing this candidate",
+        )
+
+    analysis = analyze_candidate_resume(candidate.resume_text)
+    candidate.skills = merge_skills(candidate.skills, analysis["skills"])
+    if candidate.experience_years is None:
+        candidate.experience_years = analysis["experience_years"]
+    if not candidate.experience_summary:
+        candidate.experience_summary = analysis["experience_summary"]
+    db.commit()
+
+    return CandidateAnalysisRead(
+        candidate_id=candidate.id,
+        skills=candidate.skills,
+        skill_evidence=analysis["skill_evidence"],
+        experience_years=candidate.experience_years,
+        experience_summary=candidate.experience_summary,
+        experience_evidence=analysis["experience_evidence"],
+        analyzer=analysis["analyzer"],
+    )

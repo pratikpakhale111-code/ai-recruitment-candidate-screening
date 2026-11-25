@@ -11,8 +11,8 @@
 | 1 · Nov 25 | Scope and project foundation | Working FastAPI project, configuration template, setup guide, and this roadmap |
 | 2 · Nov 26 | Data model and persistence | Jobs, candidates, applications, screening runs/results, and recruiter decisions stored through SQLAlchemy; REST routes for creating and listing jobs, candidates, and applications |
 | 3 · Nov 27 | Resume intake | Validated PDF/DOCX upload, safe file handling, and text extraction |
-| 4 · Nov 28 | Job description analysis | Job form/API and structured must-have skills, preferred skills, and experience expectations |
-| 5 · Nov 29 | Candidate profile extraction | Normalized skills and experience with supporting text snippets and extraction confidence |
+| 4 · Nov 28 | Job description analysis | Job form/API and structured must-have skills, preferred skills, and experience expectations, with source snippets |
+| 5 · Nov 29 | Candidate profile extraction | Normalized skill mentions and experience with supporting text snippets; later replace/augment the baseline with LLM extraction |
 | 6 · Nov 30 | Explainable scoring | Versioned, configurable rubric with criterion-level matches, gaps, and evidence; no hidden single-factor decision |
 | 7 · Dec 1 | Ranking and agent workflow | Screening workflow that analyzes a job and candidates, ranks results, and records its steps |
 | 8 · Dec 2 | Knowledge retrieval | Resume evidence retrieval for each criterion using a vector store; citations point back to candidate text |
@@ -52,4 +52,4 @@
 
 | Date | Progress | Next |
 |---|---|---|
-| Nov 25 | Roadmap, FastAPI scaffold, Conda setup, SQLAlchemy models, initial job/candidate/application routes, and PDF/DOCX text extraction created; source pushed to public GitHub repository | Add structured job requirement and candidate skill extraction |
+| Nov 25 | Roadmap, FastAPI scaffold, Conda setup, SQLAlchemy models, job/candidate/application routes, PDF/DOCX text extraction, and evidence-returning keyword analysis created; source pushed to public GitHub repository | Add explainable candidate-to-job scoring |

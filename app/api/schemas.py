@@ -61,3 +61,28 @@ class ApplicationRead(BaseModel):
     status: str
     decision_status: str
     created_at: datetime
+
+
+class SkillEvidenceRead(BaseModel):
+    skill: str
+    evidence: list[str]
+
+
+class JobAnalysisRead(BaseModel):
+    job_id: int
+    required_skills: list[str]
+    preferred_skills: list[str]
+    skill_evidence: list[SkillEvidenceRead]
+    min_experience_years: float | None
+    experience_evidence: list[str]
+    analyzer: str
+
+
+class CandidateAnalysisRead(BaseModel):
+    candidate_id: int
+    skills: list[str]
+    skill_evidence: list[SkillEvidenceRead]
+    experience_years: float | None
+    experience_summary: str | None
+    experience_evidence: list[str]
+    analyzer: str

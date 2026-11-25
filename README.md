@@ -28,8 +28,12 @@ The API is available under `/api/v1`; the interactive Swagger page at `/docs` li
 | `POST` | `/api/v1/applications` | Link a candidate to a job |
 | `GET` | `/api/v1/applications` | List applications; optionally filter with `?job_id=...` |
 | `POST` | `/api/v1/jobs/{job_id}/applications/upload` | Upload a PDF/DOCX resume, extract text, and create the candidate application |
+| `POST` | `/api/v1/jobs/{job_id}/analyze` | Extract job skills and experience requirements with source evidence |
+| `POST` | `/api/v1/candidates/{candidate_id}/analyze` | Extract candidate skill and experience mentions with source evidence |
 
 Resume upload accepts files up to 10 MB and 50 PDF pages. The original file is not saved; extracted text and the supplied filename are kept with the candidate profile for screening. Scanned image-only PDFs are not supported until OCR is added.
+
+The current profile analyzer uses a small exact-keyword skill catalog and evidence snippets. It does not yet understand synonyms beyond listed aliases or judge skill proficiency; review its extracted matches before using them in a screening decision.
 
 ## Database
 
