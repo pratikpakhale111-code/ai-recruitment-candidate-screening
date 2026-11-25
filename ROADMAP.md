@@ -52,4 +52,4 @@
 
 | Date | Progress | Next |
 |---|---|---|
-| Nov 25 | Roadmap, FastAPI scaffold, Conda setup, SQLAlchemy models, and initial job/candidate/application routes created; source pushed to public GitHub repository | Add resume upload and text extraction |
+| Nov 25 | Roadmap, FastAPI scaffold, Conda setup, SQLAlchemy models, initial job/candidate/application routes, and PDF/DOCX text extraction created; source pushed to public GitHub repository | Add structured job requirement and candidate skill extraction |

@@ -27,6 +27,9 @@ The API is available under `/api/v1`; the interactive Swagger page at `/docs` li
 | `GET` | `/api/v1/candidates/{candidate_id}` | Get a candidate profile |
 | `POST` | `/api/v1/applications` | Link a candidate to a job |
 | `GET` | `/api/v1/applications` | List applications; optionally filter with `?job_id=...` |
+| `POST` | `/api/v1/jobs/{job_id}/applications/upload` | Upload a PDF/DOCX resume, extract text, and create the candidate application |
+
+Resume upload accepts files up to 10 MB and 50 PDF pages. The original file is not saved; extracted text and the supplied filename are kept with the candidate profile for screening. Scanned image-only PDFs are not supported until OCR is added.
 
 ## Database
 
