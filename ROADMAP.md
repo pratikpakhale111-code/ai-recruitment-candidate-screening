@@ -13,7 +13,7 @@
 | 3 · Nov 27 | Resume intake | Validated PDF/DOCX upload, safe file handling, and text extraction |
 | 4 · Nov 28 | Job description analysis | Job form/API and structured must-have skills, preferred skills, and experience expectations, with source snippets |
 | 5 · Nov 29 | Candidate profile extraction | Normalized skill mentions and experience with supporting text snippets; later replace/augment the baseline with LLM extraction |
-| 6 · Nov 30 | Explainable scoring | Versioned, configurable rubric with criterion-level matches, gaps, and evidence; no hidden single-factor decision |
+| 6 · Nov 30 | Explainable scoring | Versioned rubric with criterion-level matches, gaps, scores, and evidence; unknown experience is not treated as zero |
 | 7 · Dec 1 | Ranking and agent workflow | Screening workflow that analyzes a job and candidates, ranks results, and records its steps |
 | 8 · Dec 2 | Knowledge retrieval | Resume evidence retrieval for each criterion using a vector store; citations point back to candidate text |
 | 9 · Dec 3 | AI explanations | Grounded summaries of strengths, gaps, and uncertainty, with a deterministic fallback when an LLM is unavailable |
@@ -52,4 +52,4 @@
 
 | Date | Progress | Next |
 |---|---|---|
-| Nov 25 | Roadmap, FastAPI scaffold, Conda setup, SQLAlchemy models, job/candidate/application routes, PDF/DOCX text extraction, and evidence-returning keyword analysis created; source pushed to public GitHub repository | Add explainable candidate-to-job scoring |
+| Nov 26 | Explainable weighted scoring, ranked screening runs, persisted matches/gaps, and evidence retrieval added; changes ready for GitHub | Add a LangGraph screening workflow around the analysis and scoring steps |

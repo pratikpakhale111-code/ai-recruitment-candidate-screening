@@ -30,10 +30,14 @@ The API is available under `/api/v1`; the interactive Swagger page at `/docs` li
 | `POST` | `/api/v1/jobs/{job_id}/applications/upload` | Upload a PDF/DOCX resume, extract text, and create the candidate application |
 | `POST` | `/api/v1/jobs/{job_id}/analyze` | Extract job skills and experience requirements with source evidence |
 | `POST` | `/api/v1/candidates/{candidate_id}/analyze` | Extract candidate skill and experience mentions with source evidence |
+| `POST` | `/api/v1/jobs/{job_id}/screen` | Score and rank active applications for a job |
+| `GET` | `/api/v1/screening-runs/{run_id}` | Retrieve a saved screening run and its evidence |
 
 Resume upload accepts files up to 10 MB and 50 PDF pages. The original file is not saved; extracted text and the supplied filename are kept with the candidate profile for screening. Scanned image-only PDFs are not supported until OCR is added.
 
 The current profile analyzer uses a small exact-keyword skill catalog and evidence snippets. It does not yet understand synonyms beyond listed aliases or judge skill proficiency; review its extracted matches before using them in a screening decision.
+
+Screening scores use a 60% required-skills, 20% preferred-skills, and 20% experience rubric. The weights are normalized across criteria with available data. Unknown experience is excluded from the calculation and shown as unknown, rather than treated as zero. Results include criterion-level matches, gaps, source snippets, and a recruiter-review notice; the score is decision support, not an automated hiring decision.
 
 ## Database
 
