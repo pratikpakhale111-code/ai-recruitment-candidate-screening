@@ -11,7 +11,7 @@ An API-first recruitment screening MVP that extracts job-relevant resume evidenc
 5. Start the API: `uvicorn app.main:app --reload`.
 6. Open `http://127.0.0.1:8000/docs` for the interactive REST API or `http://127.0.0.1:8000/health` for the health check.
 
-The initial increment includes the API foundation and SQLAlchemy database schema. Resume processing, AI analysis, and the recruiter dashboard will arrive in the roadmap sequence.
+The API foundation, SQLAlchemy schema, resume intake, profile analysis, and explainable ranking are implemented. The screening endpoint now runs a LangGraph workflow; it calls an OpenAI model when configured and reports when it uses the keyword fallback.
 
 ## Current API routes
 
@@ -39,6 +39,20 @@ The current profile analyzer uses a small exact-keyword skill catalog and eviden
 
 Screening scores use a 60% required-skills, 20% preferred-skills, and 20% experience rubric. The weights are normalized across criteria with available data. Unknown experience is excluded from the calculation and shown as unknown, rather than treated as zero. Results include criterion-level matches, gaps, source snippets, and a recruiter-review notice; the score is decision support, not an automated hiring decision.
 
+## LLM and agent workflow
+
+`app/agents/screening_workflow.py` defines the LangGraph workflow with job-requirement, candidate-evidence, scoring, and explanation nodes. `app/agents/schemas.py` defines the structured outputs. The graph runs from `POST /api/v1/jobs/{job_id}/screen` and stores its analysis mode with the screening run.
+
+OpenAI is the first configured model provider. To enable LLM calls, install the current dependencies and set these values in your local `.env` file:
+
+```text
+LLM_PROVIDER=openai
+LLM_API_KEY=your-key
+LLM_MODEL=gpt-5.4-mini
+```
+
+Restart the API after changing settings. With no API key, the LangGraph workflow still runs but uses the keyword baseline; the response reports `analysis_mode: "keyword_baseline"` and `llm_status: "api_key_missing"`. LLM calls send the job description and resume text to OpenAI, so use candidate data only when you are authorized to process it that way; provider charges may apply. The workflow validates extracted quotes against the source text, and the recruiter remains responsible for decisions. See the [LangGraph quickstart](https://docs.langchain.com/oss/python/langgraph/quickstart) and [ChatOpenAI integration docs](https://docs.langchain.com/oss/python/integrations/chat/openai).
+
 ## Database
 
 SQLAlchemy supports both databases through the same models. The local quick start uses SQLite, so you can run the project without a separate database service. PostgreSQL is supported through `DATABASE_URL` and is the intended deployment database. To use PostgreSQL locally, set a connection string such as `postgresql+psycopg://USER:PASSWORD@localhost:5432/ai_recruitment` in `.env` and make sure the PostgreSQL server and database are available.
@@ -47,6 +61,7 @@ SQLAlchemy supports both databases through the same models. The local quick star
 
 ```text
 app/
+  agents/       LangGraph workflow and structured LLM output schemas
   api/          HTTP routes
   db/           SQLAlchemy base, connection, and sessions
   models/       Jobs, candidates, applications, screening, and decisions

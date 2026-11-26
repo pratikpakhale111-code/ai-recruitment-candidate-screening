@@ -9,4 +9,5 @@ psycopg[binary]
 redis
 langgraph
 langchain-core
+langchain-openai
 chromadb

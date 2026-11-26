@@ -63,12 +63,21 @@ def _score_skill_group(
     return score, matched, missing, evidence
 
 
-def score_candidate(job: Job, candidate: Candidate) -> dict[str, Any]:
+def score_candidate(
+    job: Job,
+    candidate: Candidate,
+    skill_evidence: list[dict[str, Any]] | None = None,
+) -> dict[str, Any]:
     candidate_skills = {_normalize_skill(skill) for skill in (candidate.skills or [])}
     resume_evidence = {
         _normalize_skill(item["skill"]): item["evidence"]
         for item in extract_skill_evidence(candidate.resume_text or "")
     }
+    for item in skill_evidence or []:
+        normalized = _normalize_skill(item.get("skill", ""))
+        quotes = item.get("evidence", [])
+        if normalized and quotes:
+            resume_evidence[normalized] = list(dict.fromkeys(resume_evidence.get(normalized, []) + quotes))
     has_profile_data = bool(candidate_skills or candidate.resume_text)
 
     required_score, required_matches, required_gaps, required_evidence = _score_skill_group(

@@ -6,10 +6,10 @@ from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.orm import Session, joinedload
 
+from app.agents.screening_workflow import get_screening_workflow, initial_screening_state
 from app.db.session import get_db
-from app.models import Application, Candidate, Job, ScreeningResult, ScreeningRun
-from app.services.profile_analyzer import analyze_candidate_resume, analyze_job_description, merge_skills
-from app.services.scoring import BASE_WEIGHTS, score_candidate
+from app.models import Application, Job, ScreeningResult, ScreeningRun
+from app.services.scoring import BASE_WEIGHTS
 
 router = APIRouter(tags=["screening"])
 
@@ -35,6 +35,8 @@ class ScreeningRunRead(BaseModel):
     started_at: datetime | None
     completed_at: datetime | None
     weights: dict[str, float]
+    analysis_mode: str
+    llm_status: str
     results: list[ScreeningCandidateRead]
     notice: str = "Screening scores support recruiter review; they do not make hiring decisions."
 
@@ -69,19 +71,10 @@ def _run_response(db: Session, run: ScreeningRun) -> ScreeningRunRead:
         started_at=run.started_at,
         completed_at=run.completed_at,
         weights=run.criteria_snapshot.get("weights", BASE_WEIGHTS),
+        analysis_mode=run.criteria_snapshot.get("analysis_mode", "keyword_baseline"),
+        llm_status=run.criteria_snapshot.get("llm_status", "unknown"),
         results=response_results,
     )
-
-
-def _prepare_candidate(candidate: Candidate) -> None:
-    if not candidate.resume_text:
-        return
-    analysis = analyze_candidate_resume(candidate.resume_text)
-    candidate.skills = merge_skills(candidate.skills or [], analysis["skills"])
-    if candidate.experience_years is None:
-        candidate.experience_years = analysis["experience_years"]
-    if not candidate.experience_summary:
-        candidate.experience_summary = analysis["experience_summary"]
 
 
 @router.post("/jobs/{job_id}/screen", response_model=ScreeningRunRead, status_code=status.HTTP_201_CREATED)
@@ -89,18 +82,6 @@ def screen_job(job_id: int, db: Session = Depends(get_db)) -> ScreeningRunRead:
     job = db.get(Job, job_id)
     if job is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Job not found")
-
-    if not job.required_skills and not job.preferred_skills and job.min_experience_years is None:
-        analysis = analyze_job_description(job.description)
-        job.required_skills = analysis["required_skills"]
-        job.preferred_skills = analysis["preferred_skills"]
-        job.min_experience_years = analysis["min_experience_years"]
-
-    if not job.required_skills and not job.preferred_skills and job.min_experience_years is None:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="No supported screening criteria were found. Add job skills or experience requirements first.",
-        )
 
     applications = db.scalars(
         select(Application)
@@ -111,41 +92,77 @@ def screen_job(job_id: int, db: Session = Depends(get_db)) -> ScreeningRunRead:
     if not applications:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Add at least one candidate application first")
 
-    for application in applications:
-        _prepare_candidate(application.candidate)
+    run_started_at = datetime.now(timezone.utc)
+    workflow_input = initial_screening_state(
+        job={
+            "title": job.title,
+            "description": job.description,
+            "required_skills": job.required_skills or [],
+            "preferred_skills": job.preferred_skills or [],
+            "min_experience_years": job.min_experience_years,
+        },
+        candidates=[
+            {
+                "application_id": application.id,
+                "candidate_id": application.candidate_id,
+                "candidate_name": application.candidate.full_name,
+                "skills": application.candidate.skills or [],
+                "experience_years": application.candidate.experience_years,
+                "experience_summary": application.candidate.experience_summary,
+                "resume_text": application.candidate.resume_text or "",
+            }
+            for application in applications
+        ],
+    )
+    workflow_result = get_screening_workflow().invoke(workflow_input)
+    job_analysis = workflow_result["job_analysis"]
+    if not job_analysis["required_skills"] and not job_analysis["preferred_skills"] and job_analysis["min_experience_years"] is None:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="No supported screening criteria were found. Add job skills or experience requirements first.",
+        )
 
-    now = datetime.now(timezone.utc)
+    job.required_skills = job_analysis["required_skills"]
+    job.preferred_skills = job_analysis["preferred_skills"]
+    job.min_experience_years = job_analysis["min_experience_years"]
+    candidate_analyses = {
+        analysis["candidate_id"]: analysis for analysis in workflow_result["candidate_analyses"]
+    }
+    for application in applications:
+        candidate = application.candidate
+        analysis = candidate_analyses[candidate.id]
+        candidate.skills = analysis["skills"]
+        if candidate.experience_years is None:
+            candidate.experience_years = analysis["experience_years"]
+        if not candidate.experience_summary:
+            candidate.experience_summary = analysis["experience_summary"]
+
     run = ScreeningRun(
         job_id=job_id,
         status="running",
         criteria_snapshot={
-            "required_skills": job.required_skills or [],
-            "preferred_skills": job.preferred_skills or [],
-            "min_experience_years": job.min_experience_years,
+            "required_skills": job_analysis["required_skills"],
+            "preferred_skills": job_analysis["preferred_skills"],
+            "min_experience_years": job_analysis["min_experience_years"],
             "weights": BASE_WEIGHTS,
+            "analysis_mode": workflow_result["analysis_mode"],
+            "llm_status": workflow_result["llm_status"],
+            "llm_successes": workflow_result["llm_successes"],
+            "fallback_count": workflow_result["fallback_count"],
         },
-        started_at=now,
+        started_at=run_started_at,
     )
     db.add(run)
     db.flush()
 
-    scored: list[tuple[Application, dict[str, Any]]] = [
-        (application, score_candidate(job, application.candidate)) for application in applications
-    ]
-    ranked = sorted(
-        (item for item in scored if item[1]["suitability_score"] is not None),
-        key=lambda item: (-item[1]["suitability_score"], item[0].candidate.full_name.casefold(), item[0].id),
-    )
-    rank_by_application = {application.id: rank for rank, (application, _) in enumerate(ranked, start=1)}
-
-    for application, score in scored:
+    for score in workflow_result["results"]:
         category_scores = score["category_scores"]
         stored_matches = [{"status": "category_scores", "category_scores": category_scores}, *score["matches"]]
         db.add(
             ScreeningResult(
                 screening_run_id=run.id,
-                application_id=application.id,
-                rank=rank_by_application.get(application.id),
+                application_id=score["application_id"],
+                rank=score["rank"],
                 suitability_score=score["suitability_score"],
                 matches=stored_matches,
                 gaps=score["gaps"],

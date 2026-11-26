@@ -14,9 +14,9 @@
 | 4 · Nov 28 | Job description analysis | Job form/API and structured must-have skills, preferred skills, and experience expectations, with source snippets |
 | 5 · Nov 29 | Candidate profile extraction | Normalized skill mentions and experience with supporting text snippets; later replace/augment the baseline with LLM extraction |
 | 6 · Nov 30 | Explainable scoring | Versioned rubric with criterion-level matches, gaps, scores, and evidence; unknown experience is not treated as zero |
-| 7 · Dec 1 | Ranking and agent workflow | Screening workflow that analyzes a job and candidates, ranks results, and records its steps |
+| 7 · Dec 1 | Ranking and agent workflow | LangGraph nodes for job analysis, candidate evidence, deterministic scoring, and explanations; OpenAI calls when configured and a visible fallback when unavailable |
 | 8 · Dec 2 | Knowledge retrieval | Resume evidence retrieval for each criterion using a vector store; citations point back to candidate text |
-| 9 · Dec 3 | AI explanations | Grounded summaries of strengths, gaps, and uncertainty, with a deterministic fallback when an LLM is unavailable |
+| 9 · Dec 3 | AI explanations | Improve grounded summaries of strengths, gaps, and uncertainty, with source quote validation and a deterministic fallback |
 | 10 · Dec 4 | Recruiter dashboard | Create a job, add candidates, see ranked results, and open evidence-backed candidate details |
 | 11 · Dec 5 | Shortlisting workflow | Recruiter-controlled advance/reject/hold decisions, notes, and a basic decision history |
 | 12 · Dec 6 | Reliability and API handoff | Clear validation/errors, privacy-minded logging, API examples, and a Postman collection |
@@ -52,4 +52,4 @@
 
 | Date | Progress | Next |
 |---|---|---|
-| Nov 26 | Explainable weighted scoring, ranked screening runs, persisted matches/gaps, and evidence retrieval added; changes ready for GitHub | Add a LangGraph screening workflow around the analysis and scoring steps |
+| Nov 26 | Explainable weighted scoring and ranked screening runs added; LangGraph job, candidate, scoring, and explanation nodes wired with OpenAI structured outputs and a visible baseline fallback | Configure the local API key, then improve RAG evidence retrieval |

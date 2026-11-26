@@ -8,9 +8,9 @@ class Settings(BaseSettings):
     environment: str = "development"
     database_url: str = "sqlite:///./recruitment.db"
     redis_url: str = "redis://localhost:6379/0"
-    llm_provider: str = ""
+    llm_provider: str = "openai"
     llm_api_key: str = ""
-    llm_model: str = ""
+    llm_model: str = "gpt-5.4-mini"
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 
