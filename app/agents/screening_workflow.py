@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 from functools import lru_cache
 from types import SimpleNamespace
 from typing import Any, TypedDict
@@ -19,6 +20,7 @@ from app.settings import settings
 MAX_LLM_SOURCE_CHARACTERS = 30_000
 OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
 FREE_LLM_MODEL = "openai/gpt-oss-120b:free"
+logger = logging.getLogger(__name__)
 
 
 class ScreeningAgentState(TypedDict):
@@ -32,6 +34,21 @@ class ScreeningAgentState(TypedDict):
     fallback_count: int
     analysis_mode: str
     llm_status: str
+
+
+def _log_llm_failure(stage: str, error: Exception) -> None:
+    detail = str(error)
+    for secret in {settings.llm_api_key, settings.llm_api_key.strip()} - {""}:
+        detail = detail.replace(secret, "[redacted]")
+    status_code = getattr(error, "status_code", None)
+    status = f" HTTP {status_code}" if status_code is not None else ""
+    logger.warning(
+        "OpenRouter %s request failed (%s%s): %s",
+        stage,
+        type(error).__name__,
+        status,
+        detail[:400],
+    )
 
 
 @lru_cache(maxsize=1)
@@ -161,7 +178,8 @@ def _job_requirements_agent(state: ScreeningAgentState) -> dict[str, Any]:
             "llm_successes": state["llm_successes"] + 1,
             "llm_status": "ready",
         }
-    except Exception:
+    except Exception as error:
+        _log_llm_failure("job requirements", error)
         return {
             "job_analysis": baseline,
             "fallback_count": state["fallback_count"] + 1,
@@ -254,7 +272,8 @@ def _candidate_evidence_agent(state: ScreeningAgentState) -> dict[str, Any]:
                 }
             )
             successes += 1
-        except Exception:
+        except Exception as error:
+            _log_llm_failure("candidate evidence", error)
             fallbacks += 1
             final_status = "llm_error_fallback"
             analyses.append(
@@ -393,7 +412,8 @@ def _explanation_agent(state: ScreeningAgentState) -> dict[str, Any]:
             result["explanation"] = " ".join(parts)
             result["explanation_source"] = "llm_grounded"
             successes += 1
-        except Exception:
+        except Exception as error:
+            _log_llm_failure("candidate explanation", error)
             fallbacks += 1
             final_status = "llm_error_fallback"
         results.append(result)
