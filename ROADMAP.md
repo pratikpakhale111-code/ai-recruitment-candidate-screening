@@ -53,4 +53,4 @@
 | Date | Progress | Next |
 |---|---|---|
 | Nov 26 | Explainable weighted scoring and ranked screening runs added; LangGraph job, candidate, scoring, and explanation nodes wired with OpenAI structured outputs and a visible baseline fallback | Configure a no-cost model provider, then improve RAG evidence retrieval |
-| Nov 27 | Switched to Groq GPT-OSS 120B with the user's existing Groq key; restricted the workflow to the configured model ID | Restart the API and screen from the Groq Free tier, then improve RAG evidence retrieval |
+| Nov 27 | Switched to Groq GPT-OSS 120B; added aliases for equivalent skill phrases and checks that tie AI strengths to quotes for the same criterion, leaving gaps to deterministic scoring | Rerun screening to review normalized criteria and explanations, then improve RAG evidence retrieval |

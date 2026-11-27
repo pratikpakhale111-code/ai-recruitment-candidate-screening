@@ -28,4 +28,9 @@ class ScreeningExplanationOutput(BaseModel):
     summary: str = Field(description="Short summary based only on the supplied score and evidence")
     summary_evidence: list[str] = Field(description="Exact supporting quotes for the summary")
     strengths: list[GroundedClaim] = Field(description="Supported strengths relevant to the job")
-    considerations: list[GroundedClaim] = Field(description="Supported gaps or unknowns to review")
+    considerations: list[GroundedClaim] = Field(
+        description=(
+            "Leave empty. Gaps and unknowns are reported directly from the deterministic scoring result; "
+            "do not pair an absent skill with an unrelated positive resume quote."
+        )
+    )
