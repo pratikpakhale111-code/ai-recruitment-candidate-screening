@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+import os
 from functools import lru_cache
 from types import SimpleNamespace
 from typing import Any, TypedDict
@@ -63,9 +64,10 @@ def _get_chat_model() -> tuple[Any | None, str]:
     try:
         from langchain_openrouter import ChatOpenRouter
 
+        # The OpenRouter integration reads its credential from this standard env var.
+        os.environ["OPENROUTER_API_KEY"] = settings.llm_api_key.strip()
         model = ChatOpenRouter(
             model=FREE_LLM_MODEL,
-            api_key=settings.llm_api_key.strip(),
             max_retries=1,
         )
     except ImportError:
