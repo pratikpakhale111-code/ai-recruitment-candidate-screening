@@ -19,7 +19,7 @@ from app.services.scoring import BASE_WEIGHTS, score_candidate
 from app.settings import settings
 
 MAX_LLM_SOURCE_CHARACTERS = 30_000
-FREE_LLM_MODEL = "openai/gpt-oss-120b:free"
+GROQ_MODEL = "openai/gpt-oss-120b"
 logger = logging.getLogger(__name__)
 
 
@@ -43,7 +43,8 @@ def _log_llm_failure(stage: str, error: Exception) -> None:
     status_code = getattr(error, "status_code", None)
     status = f" HTTP {status_code}" if status_code is not None else ""
     logger.warning(
-        "OpenRouter %s request failed (%s%s): %s",
+        "%s %s request failed (%s%s): %s",
+        settings.llm_provider.strip().title() or "LLM",
         stage,
         type(error).__name__,
         status,
@@ -53,25 +54,26 @@ def _log_llm_failure(stage: str, error: Exception) -> None:
 
 @lru_cache(maxsize=1)
 def _get_chat_model() -> tuple[Any | None, str]:
-    provider = settings.llm_provider.strip().lower() or "openrouter"
-    if provider != "openrouter":
+    provider = settings.llm_provider.strip().lower() or "groq"
+    if provider != "groq":
         return None, "provider_not_configured"
     if not settings.llm_api_key.strip():
         return None, "api_key_missing"
-    model_name = settings.llm_model.strip() or FREE_LLM_MODEL
-    if model_name != FREE_LLM_MODEL:
-        return None, "free_model_required"
+    model_name = settings.llm_model.strip() or GROQ_MODEL
+    if model_name != GROQ_MODEL:
+        return None, "groq_model_required"
     try:
-        from langchain_openrouter import ChatOpenRouter
+        from langchain_groq import ChatGroq
 
-        # The OpenRouter integration reads its credential from this standard env var.
-        os.environ["OPENROUTER_API_KEY"] = settings.llm_api_key.strip()
-        model = ChatOpenRouter(
-            model=FREE_LLM_MODEL,
+        # ChatGroq reads this key from the standard Groq environment variable.
+        os.environ["GROQ_API_KEY"] = settings.llm_api_key.strip()
+        model = ChatGroq(
+            model=GROQ_MODEL,
+            timeout=45,
             max_retries=1,
         )
     except ImportError:
-        return None, "langchain_openrouter_package_missing"
+        return None, "langchain_groq_package_missing"
     return model, "ready"
 
 

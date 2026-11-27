@@ -8,9 +8,9 @@ class Settings(BaseSettings):
     environment: str = "development"
     database_url: str = "sqlite:///./recruitment.db"
     redis_url: str = "redis://localhost:6379/0"
-    llm_provider: str = "openrouter"
+    llm_provider: str = "groq"
     llm_api_key: str = ""
-    llm_model: str = "openai/gpt-oss-120b:free"
+    llm_model: str = "openai/gpt-oss-120b"
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 

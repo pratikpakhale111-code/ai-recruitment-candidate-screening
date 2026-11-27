@@ -11,7 +11,7 @@ An API-first recruitment screening MVP that extracts job-relevant resume evidenc
 5. Start the API: `uvicorn app.main:app --reload`.
 6. Open `http://127.0.0.1:8000/docs` for the interactive REST API or `http://127.0.0.1:8000/health` for the health check.
 
-The API foundation, SQLAlchemy schema, resume intake, profile analysis, and explainable ranking are implemented. The screening endpoint now runs a LangGraph workflow; it calls OpenAI's open-weight gpt-oss-120b through OpenRouter's free endpoint when configured and reports when it uses the keyword fallback.
+The API foundation, SQLAlchemy schema, resume intake, profile analysis, and explainable ranking are implemented. The screening endpoint runs a LangGraph workflow and can use OpenAI's open-weight gpt-oss-120b through Groq when configured; otherwise it reports when it uses the keyword fallback.
 
 ## Current API routes
 
@@ -43,15 +43,15 @@ Screening scores use a 60% required-skills, 20% preferred-skills, and 20% experi
 
 `app/agents/screening_workflow.py` defines the LangGraph workflow with job-requirement, candidate-evidence, scoring, and explanation nodes. `app/agents/schemas.py` defines the structured outputs. The graph runs from `POST /api/v1/jobs/{job_id}/screen` and stores its analysis mode with the screening run.
 
-The workflow uses LangChain's OpenRouter integration and the exact free model ID below. Put your OpenRouter API key in the `LLM_API_KEY` setting in your local `.env` file; do not paste it into source code or commit it:
+The workflow uses LangChain's Groq integration with this model ID. Put your Groq API key in the `LLM_API_KEY` setting in your local `.env` file; do not paste it into source code or commit it:
 
 ```text
-LLM_PROVIDER=openrouter
-LLM_API_KEY=your-openrouter-key
-LLM_MODEL=openai/gpt-oss-120b:free
+LLM_PROVIDER=groq
+LLM_API_KEY=your-groq-key
+LLM_MODEL=openai/gpt-oss-120b
 ```
 
-Restart the API after changing settings. With no API key, the LangGraph workflow still runs but uses the keyword baseline; the response reports `analysis_mode: "keyword_baseline"` and `llm_status: "api_key_missing"`. The app rejects any model setting other than `openai/gpt-oss-120b:free`, avoiding accidental use of a paid model. OpenRouter currently lists this free variant at $0, with limits of 20 requests per minute and 50 per day; availability and provider limits can change. Do not buy credits for this setup. LLM calls send the job description and resume text to OpenRouter, so only send candidate data when authorized. The workflow validates extracted quotes against the source text, and the recruiter remains responsible for decisions. See [OpenRouter's free model details and limits](https://openrouter.ai/collections/free-models/), the [gpt-oss-120b free model page](https://openrouter.ai/openai/gpt-oss-120b:free), the [OpenRouter API quickstart](https://openrouter.ai/docs/quickstart), the [OpenRouter LangChain integration guide](https://openrouter.ai/blog/tutorials/langchain-chatopenrouter-setup/), and the [LangGraph quickstart](https://docs.langchain.com/oss/python/langgraph/quickstart).
+Restart the API after changing settings. With no API key, the LangGraph workflow still runs but uses the keyword baseline; the response reports `analysis_mode: "keyword_baseline"` and `llm_status: "api_key_missing"`. The app only allows the configured Groq model ID, `openai/gpt-oss-120b`. Groq provides a Free tier with rate limits, but this model has published Developer-tier prices of $0.15 per million input tokens and $0.60 per million output tokens. Keep your account on Groq's Free tier and do not upgrade to Developer if you want to avoid charges; check your account tier before use because the app cannot enforce provider-side billing. LLM calls send the job description and resume text to Groq, so only send candidate data when authorized. The workflow validates extracted quotes against the source text, and the recruiter remains responsible for decisions. See Groq's [GPT-OSS 120B model and pricing](https://console.groq.com/docs/model/openai/gpt-oss-120b), [Free and Developer tier billing details](https://console.groq.com/docs/billing-faqs), [rate limits](https://console.groq.com/docs/rate-limits), the [ChatGroq integration reference](https://reference.langchain.com/python/langchain-groq/chat_models/ChatGroq), and the [LangGraph quickstart](https://docs.langchain.com/oss/python/langgraph/quickstart).
 
 ## Database
 
