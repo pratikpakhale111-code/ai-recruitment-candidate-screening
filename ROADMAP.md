@@ -14,7 +14,7 @@
 | 4 · Nov 28 | Job description analysis | Job form/API and structured must-have skills, preferred skills, and experience expectations, with source snippets |
 | 5 · Nov 29 | Candidate profile extraction | Normalized skill mentions and experience with supporting text snippets; later replace/augment the baseline with LLM extraction |
 | 6 · Nov 30 | Explainable scoring | Versioned rubric with criterion-level matches, gaps, scores, and evidence; unknown experience is not treated as zero |
-| 7 · Dec 1 | Ranking and agent workflow | LangGraph nodes for job analysis, candidate evidence, deterministic scoring, and explanations; OpenAI calls when configured and a visible fallback when unavailable |
+| 7 · Dec 1 | Ranking and agent workflow | LangGraph nodes for job analysis, candidate evidence, deterministic scoring, and explanations; OpenRouter free-model calls when configured and a visible fallback when unavailable |
 | 8 · Dec 2 | Knowledge retrieval | Resume evidence retrieval for each criterion using a vector store; citations point back to candidate text |
 | 9 · Dec 3 | AI explanations | Improve grounded summaries of strengths, gaps, and uncertainty, with source quote validation and a deterministic fallback |
 | 10 · Dec 4 | Recruiter dashboard | Create a job, add candidates, see ranked results, and open evidence-backed candidate details |
@@ -52,4 +52,5 @@
 
 | Date | Progress | Next |
 |---|---|---|
-| Nov 26 | Explainable weighted scoring and ranked screening runs added; LangGraph job, candidate, scoring, and explanation nodes wired with OpenAI structured outputs and a visible baseline fallback | Configure the local API key, then improve RAG evidence retrieval |
+| Nov 26 | Explainable weighted scoring and ranked screening runs added; LangGraph job, candidate, scoring, and explanation nodes wired with OpenAI structured outputs and a visible baseline fallback | Configure a no-cost model provider, then improve RAG evidence retrieval |
+| Nov 27 | Configured OpenRouter and `openai/gpt-oss-120b:free`; added a guard that prevents the workflow from using a different, potentially paid model ID | Restart the API and try screening with the free model, then improve RAG evidence retrieval |

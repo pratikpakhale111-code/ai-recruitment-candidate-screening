@@ -17,6 +17,8 @@ from app.services.scoring import BASE_WEIGHTS, score_candidate
 from app.settings import settings
 
 MAX_LLM_SOURCE_CHARACTERS = 30_000
+OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
+FREE_LLM_MODEL = "openai/gpt-oss-120b:free"
 
 
 class ScreeningAgentState(TypedDict):
@@ -34,17 +36,21 @@ class ScreeningAgentState(TypedDict):
 
 @lru_cache(maxsize=1)
 def _get_chat_model() -> tuple[Any | None, str]:
-    provider = settings.llm_provider.strip().lower() or "openai"
-    if provider != "openai":
+    provider = settings.llm_provider.strip().lower() or "openrouter"
+    if provider != "openrouter":
         return None, "provider_not_configured"
     if not settings.llm_api_key.strip():
         return None, "api_key_missing"
+    model_name = settings.llm_model.strip() or FREE_LLM_MODEL
+    if model_name != FREE_LLM_MODEL:
+        return None, "free_model_required"
     try:
         from langchain_openai import ChatOpenAI
 
         model = ChatOpenAI(
-            model=settings.llm_model.strip() or "gpt-5.4-mini",
+            model=FREE_LLM_MODEL,
             api_key=settings.llm_api_key,
+            base_url=OPENROUTER_BASE_URL,
             timeout=45,
             max_retries=1,
         )
