@@ -135,7 +135,7 @@ def _job_requirements_agent(state: ScreeningAgentState) -> dict[str, Any]:
     )
     try:
         extracted = model.with_structured_output(
-            JobRequirementsOutput, method="json_schema"
+            JobRequirementsOutput, method="function_calling"
         ).invoke(prompt)
         required_findings = [
             {"skill": item.skill.strip(), "evidence": [item.quote.strip()]}
@@ -250,7 +250,7 @@ def _candidate_evidence_agent(state: ScreeningAgentState) -> dict[str, Any]:
         )
         try:
             extracted = model.with_structured_output(
-                CandidateProfileOutput, method="json_schema"
+                CandidateProfileOutput, method="function_calling"
             ).invoke(prompt)
             llm_findings = [
                 {"skill": item.skill.strip(), "evidence": [item.quote.strip()]}
@@ -410,7 +410,7 @@ def _explanation_agent(state: ScreeningAgentState) -> dict[str, Any]:
         )
         try:
             explanation = model.with_structured_output(
-                ScreeningExplanationOutput, method="json_schema"
+                ScreeningExplanationOutput, method="function_calling"
             ).invoke(prompt)
             parts = [score["explanation"]]
             accepted_ai_content = False
