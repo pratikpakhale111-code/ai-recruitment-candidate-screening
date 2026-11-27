@@ -43,7 +43,7 @@ Screening scores use a 60% required-skills, 20% preferred-skills, and 20% experi
 
 `app/agents/screening_workflow.py` defines the LangGraph workflow with job-requirement, candidate-evidence, scoring, and explanation nodes. `app/agents/schemas.py` defines the structured outputs. The graph runs from `POST /api/v1/jobs/{job_id}/screen` and stores its analysis mode with the screening run.
 
-The workflow uses OpenRouter's OpenAI-compatible API with the exact free model ID below. Put your OpenRouter API key in your local `.env` file; do not paste it into source code or commit it:
+The workflow uses LangChain's OpenRouter integration and the exact free model ID below. Put your OpenRouter API key in the `LLM_API_KEY` setting in your local `.env` file; do not paste it into source code or commit it:
 
 ```text
 LLM_PROVIDER=openrouter
@@ -51,7 +51,7 @@ LLM_API_KEY=your-openrouter-key
 LLM_MODEL=openai/gpt-oss-120b:free
 ```
 
-Restart the API after changing settings. With no API key, the LangGraph workflow still runs but uses the keyword baseline; the response reports `analysis_mode: "keyword_baseline"` and `llm_status: "api_key_missing"`. The app rejects any model setting other than `openai/gpt-oss-120b:free`, avoiding accidental use of a paid model. OpenRouter currently lists this free variant at $0, with limits of 20 requests per minute and 50 per day; availability and provider limits can change. Do not buy credits for this setup. LLM calls send the job description and resume text to OpenRouter, so only send candidate data when authorized. The workflow validates extracted quotes against the source text, and the recruiter remains responsible for decisions. See [OpenRouter's free model details and limits](https://openrouter.ai/collections/free-models/), the [gpt-oss-120b free model page](https://openrouter.ai/openai/gpt-oss-120b:free), the [OpenRouter API quickstart](https://openrouter.ai/docs/quickstart), the [LangGraph quickstart](https://docs.langchain.com/oss/python/langgraph/quickstart), and [ChatOpenAI integration docs](https://docs.langchain.com/oss/python/integrations/chat/openai).
+Restart the API after changing settings. With no API key, the LangGraph workflow still runs but uses the keyword baseline; the response reports `analysis_mode: "keyword_baseline"` and `llm_status: "api_key_missing"`. The app rejects any model setting other than `openai/gpt-oss-120b:free`, avoiding accidental use of a paid model. OpenRouter currently lists this free variant at $0, with limits of 20 requests per minute and 50 per day; availability and provider limits can change. Do not buy credits for this setup. LLM calls send the job description and resume text to OpenRouter, so only send candidate data when authorized. The workflow validates extracted quotes against the source text, and the recruiter remains responsible for decisions. See [OpenRouter's free model details and limits](https://openrouter.ai/collections/free-models/), the [gpt-oss-120b free model page](https://openrouter.ai/openai/gpt-oss-120b:free), the [OpenRouter API quickstart](https://openrouter.ai/docs/quickstart), the [OpenRouter LangChain integration guide](https://openrouter.ai/blog/tutorials/langchain-chatopenrouter-setup/), and the [LangGraph quickstart](https://docs.langchain.com/oss/python/langgraph/quickstart).
 
 ## Database
 

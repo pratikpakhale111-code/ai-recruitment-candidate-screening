@@ -18,7 +18,6 @@ from app.services.scoring import BASE_WEIGHTS, score_candidate
 from app.settings import settings
 
 MAX_LLM_SOURCE_CHARACTERS = 30_000
-OPENROUTER_BASE_URL = "https://openrouter.ai/api/v1"
 FREE_LLM_MODEL = "openai/gpt-oss-120b:free"
 logger = logging.getLogger(__name__)
 
@@ -62,17 +61,15 @@ def _get_chat_model() -> tuple[Any | None, str]:
     if model_name != FREE_LLM_MODEL:
         return None, "free_model_required"
     try:
-        from langchain_openai import ChatOpenAI
+        from langchain_openrouter import ChatOpenRouter
 
-        model = ChatOpenAI(
+        model = ChatOpenRouter(
             model=FREE_LLM_MODEL,
-            api_key=settings.llm_api_key,
-            base_url=OPENROUTER_BASE_URL,
-            timeout=45,
+            api_key=settings.llm_api_key.strip(),
             max_retries=1,
         )
     except ImportError:
-        return None, "langchain_openai_package_missing"
+        return None, "langchain_openrouter_package_missing"
     return model, "ready"
 
 
@@ -124,7 +121,9 @@ def _job_requirements_agent(state: ScreeningAgentState) -> dict[str, Any]:
         f"JOB DESCRIPTION:\n{description[:MAX_LLM_SOURCE_CHARACTERS]}"
     )
     try:
-        extracted = model.with_structured_output(JobRequirementsOutput).invoke(prompt)
+        extracted = model.with_structured_output(
+            JobRequirementsOutput, method="json_schema"
+        ).invoke(prompt)
         required_findings = [
             {"skill": item.skill.strip(), "evidence": [item.quote.strip()]}
             for item in extracted.required_skills
@@ -237,7 +236,9 @@ def _candidate_evidence_agent(state: ScreeningAgentState) -> dict[str, Any]:
             f"RESUME TEXT:\n{resume_text[:MAX_LLM_SOURCE_CHARACTERS]}"
         )
         try:
-            extracted = model.with_structured_output(CandidateProfileOutput).invoke(prompt)
+            extracted = model.with_structured_output(
+                CandidateProfileOutput, method="json_schema"
+            ).invoke(prompt)
             llm_findings = [
                 {"skill": item.skill.strip(), "evidence": [item.quote.strip()]}
                 for item in extracted.skills
@@ -392,7 +393,9 @@ def _explanation_agent(state: ScreeningAgentState) -> dict[str, Any]:
             f"SCREENING DATA:\n{prompt_data}"
         )
         try:
-            explanation = model.with_structured_output(ScreeningExplanationOutput).invoke(prompt)
+            explanation = model.with_structured_output(
+                ScreeningExplanationOutput, method="json_schema"
+            ).invoke(prompt)
             valid_summary_quotes = [quote for quote in explanation.summary_evidence if quote in evidence_quotes]
             if not valid_summary_quotes:
                 fallbacks += 1
