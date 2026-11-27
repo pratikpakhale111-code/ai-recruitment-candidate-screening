@@ -10,7 +10,7 @@
 |---|---|---|
 | 1 · Nov 25 | Scope and project foundation | Working FastAPI project, configuration template, setup guide, and this roadmap |
 | 2 · Nov 26 | Data model and persistence | Jobs, candidates, applications, screening runs/results, and recruiter decisions stored through SQLAlchemy; REST routes for creating and listing jobs, candidates, and applications |
-| 3 · Nov 27 | Resume intake | Validated PDF/DOCX upload, safe file handling, and text extraction |
+| 3 · Nov 27 | Resume intake | Validated PDF upload, 10 MB and 50-page limits, file signature and encryption checks, safe filename handling, and text extraction without saving the original file |
 | 4 · Nov 28 | Job description analysis | Job form/API and structured must-have skills, preferred skills, and experience expectations, with source snippets |
 | 5 · Nov 29 | Candidate profile extraction | Normalized skill mentions and experience with supporting text snippets; later replace/augment the baseline with LLM extraction |
 | 6 · Nov 30 | Explainable scoring | Versioned rubric with criterion-level matches, gaps, scores, and evidence; unknown experience is not treated as zero |
@@ -53,4 +53,4 @@
 | Date | Progress | Next |
 |---|---|---|
 | Nov 26 | Explainable weighted scoring and ranked screening runs added; LangGraph job, candidate, scoring, and explanation nodes wired with OpenAI structured outputs and a visible baseline fallback | Configure a no-cost model provider, then improve RAG evidence retrieval |
-| Nov 27 | Switched to Groq GPT-OSS 120B; added skill aliases and criterion-linked explanations; changed structured extraction to tool calling after Groq JSON Schema parsing errors; reject summaries that contradict unmet criteria and deduplicate repeated strengths | Restart the API, create a fresh screening run, then improve RAG evidence retrieval |
+| Nov 27 | Completed PDF resume intake with upload-size/page limits, file signature and encryption checks, safe filename handling, text extraction, and no original-file persistence; switched to Groq GPT-OSS 120B, corrected structured extraction, and added grounded explanation safeguards | Add the requested concise AI summary, then improve RAG evidence retrieval |
